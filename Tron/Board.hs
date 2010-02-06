@@ -13,6 +13,17 @@ data Spot = Wall | Blank | Player | Enemy
 data Move = North | East | South | West 
             deriving (Show, Eq)
 
+-- debugging
+renderBoard :: Board -> IO ()
+renderBoard rows = putStrLn $ concatMap renderRow rows
+
+renderRow cols = concatMap renderCell cols ++ "\n"
+renderCell Wall   = "#"
+renderCell Blank  = " "
+renderCell Player = "1"
+renderCell Enemy  = "2"
+
+
 -- game helpers
 
 canMove move (x,y) board

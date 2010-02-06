@@ -71,6 +71,11 @@ savedGame = "game.txt"
 
 loadGame name = openFile name ReadMode
 
+loadBoard name = do
+  fi <- loadGame name
+  str <- hGetContents fi
+  return $ head $ linesToBoards $ lines $ str
+
 offline strategy= do
   fi <- loadGame savedGame
   play fi strategy
