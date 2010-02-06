@@ -18,8 +18,11 @@ linesToBoards lines = parseBoard height thisBoard : linesToBoards rest
     where (thisBoard, rest) = splitAt height $ tail lines
           height = read $ head $ words $ head lines
 
+-- a strategy is a function from a board to the next move
+type Strategy = Board -> Move
 
--- a game is the application of the a strategy on a list of boards
+-- a game is the application of the a strategy on a list of boards, resulting with a list of moves
+game :: Strategy -> [Board] -> [Move]
 game strategy boards = map strategy boards
 
 -- the game is played by parsing the input stream of boards and rendering the moves

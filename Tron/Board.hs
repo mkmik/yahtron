@@ -1,5 +1,7 @@
 module Tron.Board where
 
+import Data.List
+
 -- a board is defined as a 2d array of spots
 type Board = [[Spot]]
 
@@ -13,8 +15,14 @@ data Move = North | East | South | West
 
 -- game helpers
 
-canMove move (x,y) tronMap
-    | move == North	= if y == 0 then False else (Blank == ((tronMap !! (y-1)) !! x))
-    | move == East	= if x+1 == (length (head tronMap)) then False else (Blank == ((tronMap !! y) !! (x+1)))
-    | move == South	= if y+1 == (length tronMap) then False else (Blank == ((tronMap !! (y+1)) !! x))
-    | move == West	= if x == 0 then False else (Blank == ((tronMap !! y) !! (x-1)))
+canMove move (x,y) board
+    | move == North	= if y == 0 then False else (Blank == ((board !! (y-1)) !! x))
+    | move == East	= if x+1 == (length (head board)) then False else (Blank == ((board !! y) !! (x+1)))
+    | move == South	= if y+1 == (length board) then False else (Blank == ((board !! (y+1)) !! x))
+    | move == West	= if x == 0 then False else (Blank == ((board !! y) !! (x-1)))
+
+-- my position
+me board = (maybe 0 id (findIndex (== Player) (head $ filter (any (== Player)) board)), maybe 0 id (findIndex (any (== Player)) board))
+
+-- legal moves for a given board
+possibleMoves board = (filter (\a -> canMove a (me board) board) [North, East, South, West]) ++ [North]
