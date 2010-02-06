@@ -5,8 +5,8 @@ import Tron.Board
 import System.IO
 
 -- main strategy
-react :: Board -> Move
-react b = head $ possibleMoves b
+react :: Strategy
+react board = head $ possibleMoves board
 
 main = do
   playStdin react
