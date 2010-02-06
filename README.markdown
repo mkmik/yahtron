@@ -11,7 +11,7 @@ I also considered starting with http://github.com/ozataman/tronhs but after a wh
 How?
 ----
 
-Edit Bot.hs and implement your strategy in the "react" function.
+Edit MyTronBot.hs and implement your strategy in the "react" function.
 
 There are some utility functions in Tron/Board.hs, took from the official haskell starter.
 

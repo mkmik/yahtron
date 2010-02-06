@@ -1,4 +1,4 @@
-module Bot where
+module MyTronBot where
 
 import Tron.Protocol
 import Tron.Board
