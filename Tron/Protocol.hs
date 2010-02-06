@@ -2,71 +2,74 @@ module Tron.Protocol where
 
 import System.IO
 import Data.List
+import Tron.Board 
 
-testMap = "game.txt"
 
-loadMap name = openFile name ReadMode
+-- basic operations
 
-game strategy lines = concatMap (newline . renderMove) $ map strategy $ linesToBoards lines
+-- parses a board of a hiven height
+parseBoard :: Int -> [String] -> Board
+parseBoard h lines = map (map readSpot) $ take h lines
 
-getSize lines = (w, h)
-    where [w,h] = map readInt $ words $ head lines
+-- transforms a lazy list of lines into a lazy list of boards
+linesToBoards :: [String] -> [Board]
+linesToBoards [] = []
+linesToBoards lines = parseBoard height thisBoard : linesToBoards rest
+    where (thisBoard, rest) = splitAt height $ tail lines
+          height = read $ head $ words $ head lines
 
+
+-- a game is the application of the a strategy on a list of boards
+game strategy boards = map strategy boards
+
+-- the game is played by parsing the input stream of boards and rendering the moves
+play file strategy = hInteract file $ renderMoves . game strategy . linesToBoards . lines
+
+-- moves are rendered as a lazy string of rendered moves terminated by new lines
+renderMoves = concatMap $ newline . renderMove
+
+
+
+-- protocol utilities
 
 hInteract file f = do 
   s <- hGetContents file
   putStr (f s)
 
-play file strategy = hInteract file $ (game strategy) . lines
-
-fresh strategy= do
-  fi <- loadMap testMap
-  play fi strategy
 
 setBuffers = do
     hSetBuffering stdin LineBuffering
     hSetBuffering stdout LineBuffering
 
+-- engine interaction require line-buffered stdin communication
 playStdin strategy = do 
   setBuffers
   play stdin strategy
 
--- game
 
-canMove move (x,y) tronMap
-    | move == North	= if y == 0 then False else (Blank == ((tronMap !! (y-1)) !! x))
-    | move == East	= if x+1 == (length (head tronMap)) then False else (Blank == ((tronMap !! y) !! (x+1)))
-    | move == South	= if y+1 == (length tronMap) then False else (Blank == ((tronMap !! (y+1)) !! x))
-    | move == West	= if x == 0 then False else (Blank == ((tronMap !! y) !! (x-1)))
-
---- map
-
-type Board = [[Spot]]
-
-data Spot = Wall | Blank | Player | Enemy 
-            deriving (Show, Eq)
-
-data Move = North | East | South | West 
-            deriving (Show, Eq)
+-- render and parse utilities
 
 newline s = s ++ "\n"
 renderMove North = "1"
-renderMove East = "2"
+renderMove East  = "2"
 renderMove South = "3"
-renderMove West = "4"
+renderMove West  = "4"
 
 readSpot '#' = Wall
 readSpot ' ' = Blank
 readSpot '1' = Player
 readSpot '2' = Enemy
 
-readInt :: String -> Int
-readInt a = read a
 
-parseBoard h lines = map (map readSpot) $ take h lines
 
-linesToBoards :: [String] -> [Board]
-linesToBoards [] = []
-linesToBoards lines = parseBoard h useful : linesToBoards rest
-    where (w,h) = getSize lines
-          (useful, rest) = splitAt h $ tail lines
+-- useful for standalone testing
+
+savedGame = "game.txt"
+
+loadGame name = openFile name ReadMode
+
+offline strategy= do
+  fi <- loadGame savedGame
+  play fi strategy
+
+
